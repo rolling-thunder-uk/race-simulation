@@ -1,0 +1,1 @@
+ # Root Textual Application setup and event management
