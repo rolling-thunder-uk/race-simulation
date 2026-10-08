@@ -1,1 +1,6 @@
-# Static physical parameters (Gravity, Gas Constants, Air)
+# Static display constants shared across the UI
+APP_TITLE = "STEM RACING ADVANCED FLUID SIMULATOR"
+APP_VERSION = "v2.0"
+APP_HEADER = f"{APP_TITLE} {APP_VERSION}"
+
+MODE_LABEL = "[ MODE: CONFIG ]"
