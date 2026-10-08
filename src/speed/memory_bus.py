@@ -1,0 +1,1 @@
+ # Async thread-safe queue mechanics for interface pipeline
