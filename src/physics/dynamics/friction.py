@@ -1,0 +1,1 @@
+# Coupled dynamic wire tension waves & bearing thermal decay

@@ -1,0 +1,1 @@
+# Parses and validates external .toml settings files

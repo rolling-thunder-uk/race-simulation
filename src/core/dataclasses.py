@@ -1,0 +1,1 @@
+# Strict immutable definitions for states and specs

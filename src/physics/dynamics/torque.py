@@ -1,0 +1,1 @@
+# Nozzle height offset vs center of mass launch squat
