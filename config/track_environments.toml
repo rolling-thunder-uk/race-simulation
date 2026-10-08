@@ -1,20 +1,22 @@
 # config/track_environments.toml
 
 [meta]
-# Replace this token with your target competition location template loop
-active_location = "ENTER_ACTIVE_LOCATION_HERE"
+# Active location used by the simulator at launch. Add your own sections below
+# and point this token at the section key.
+active_location = "DEVELOPMENT_EXAMPLE"
 
-[ENTER_ACTIVE_LOCATION_HERE]
-location_name = "NOT_SET"
-track_length_m = 20.0              # Regulation straightaway standard
-ambient_temperature_c = 0.0        # Must be verified before the launch cycle
-ambient_pressure_kpa = 0.0         # Read local barometer metrics
-relative_humidity_percent = 0.0    # Ambient track moisture content
-guide_wire_tension_newtons = 0.0   # Wire tension matches track scale bounds
-orifice_throat_diameter_mm = 0.00  # Puncture pin geometric channel diameter
+# DEVELOPMENT EXAMPLE DATA - replace with real track measurements.
+[DEVELOPMENT_EXAMPLE]
+location_name = "Development Example Track"
+track_length_m = 20.0
+ambient_temperature_c = 22.0
+ambient_pressure_kpa = 101.30
+relative_humidity_percent = 55.0
+guide_wire_tension_newtons = 12.0
+orifice_throat_diameter_mm = 3.20
 
 [uncertainties]
-# Environmental variation parameters used for stochastic distribution noise
-ambient_temp_std_dev_c = 0.0
-ambient_pressure_std_dev_kpa = 0.00
-orifice_diameter_std_dev_mm = 0.00
+# DEVELOPMENT EXAMPLE SPREAD - set to 0.0 for a perfectly clean static run.
+ambient_temp_std_dev_c = 0.5
+ambient_pressure_std_dev_kpa = 0.20
+orifice_diameter_std_dev_mm = 0.02

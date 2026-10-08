@@ -1,22 +1,24 @@
 # config/vehicle_profiles.toml
 
 [meta]
-# Replace this token with your target baseline identifier layout string
-active_profile = "ENTER_ACTIVE_PROFILE_NAME_HERE"
+# Active profile used by the simulator at launch. Add your own sections below
+# and point this token at the section key.
+active_profile = "DEVELOPMENT_EXAMPLE"
 
-[ENTER_ACTIVE_PROFILE_NAME_HERE]
-name = "NOT_SET"
-empty_mass_grams = 0.0             # Must be populated (e.g., 55.0)
-frontal_area_m2 = 0.000000         # Must be populated from CAD mesh bounds
-drag_coefficient_cd = 0.000        # Must be populated from CFD csv exports
-lift_coefficient_cl = 0.000        # Track wing profile lift dynamics
-wheelbase_mm = 0.0                 # Measurement spacing between center pins
-nozzle_center_offset_y_mm = 0.0    # Vertical distance offset from Center of Mass
-bearing_base_friction_mu = 0.000   # Calibrate to test bearing oil constants
+# DEVELOPMENT EXAMPLE DATA - replace with real competition measurements.
+[DEVELOPMENT_EXAMPLE]
+name = "Development Example Car"
+empty_mass_grams = 55.0
+frontal_area_m2 = 0.001800
+drag_coefficient_cd = 0.150
+lift_coefficient_cl = -0.050
+wheelbase_mm = 150.0
+nozzle_center_offset_y_mm = 8.0
+bearing_base_friction_mu = 0.002
 
 [uncertainties]
-# Set standard deviations to 0.0 to run a perfectly clean static tracking cycle
-mass_std_dev_grams = 0.0
-cd_std_dev = 0.000
-cl_std_dev = 0.000
-bearing_mu_std_dev = 0.000
+# DEVELOPMENT EXAMPLE SPREAD - set to 0.0 for a perfectly clean static run.
+mass_std_dev_grams = 0.5
+cd_std_dev = 0.005
+cl_std_dev = 0.005
+bearing_mu_std_dev = 0.0002
