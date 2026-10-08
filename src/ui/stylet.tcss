@@ -5,9 +5,10 @@ Screen {
 }
 
 #intro-card {
-    width: auto;
+    width: 74;
+    max-width: 90%;
     height: auto;
-    padding: 2 5;
+    padding: 2 4;
     border: round #b3122e;
     background: #121216;
 }
