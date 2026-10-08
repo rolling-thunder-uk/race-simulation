@@ -1,0 +1,20 @@
+# config/track_environments.toml
+
+[meta]
+# Replace this token with your target competition location template loop
+active_location = "ENTER_ACTIVE_LOCATION_HERE"
+
+[ENTER_ACTIVE_LOCATION_HERE]
+location_name = "NOT_SET"
+track_length_m = 20.0              # Regulation straightaway standard
+ambient_temperature_c = 0.0        # Must be verified before the launch cycle
+ambient_pressure_kpa = 0.0         # Read local barometer metrics
+relative_humidity_percent = 0.0    # Ambient track moisture content
+guide_wire_tension_newtons = 0.0   # Wire tension matches track scale bounds
+orifice_throat_diameter_mm = 0.00  # Puncture pin geometric channel diameter
+
+[uncertainties]
+# Environmental variation parameters used for stochastic distribution noise
+ambient_temp_std_dev_c = 0.0
+ambient_pressure_std_dev_kpa = 0.00
+orifice_diameter_std_dev_mm = 0.00
