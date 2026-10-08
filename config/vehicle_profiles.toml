@@ -7,7 +7,7 @@ active_profile = "DEVELOPMENT_EXAMPLE"
 
 # DEVELOPMENT EXAMPLE DATA - replace with real competition measurements.
 [DEVELOPMENT_EXAMPLE]
-name = "Development Example Car"
+name = "Dev Example"
 empty_mass_grams = 55.0
 frontal_area_m2 = 0.001800
 drag_coefficient_cd = 0.150

@@ -7,7 +7,7 @@ active_location = "DEVELOPMENT_EXAMPLE"
 
 # DEVELOPMENT EXAMPLE DATA - replace with real track measurements.
 [DEVELOPMENT_EXAMPLE]
-location_name = "Development Example Track"
+location_name = "Dev Track"
 track_length_m = 20.0
 ambient_temperature_c = 22.0
 ambient_pressure_kpa = 101.30

@@ -5,7 +5,7 @@ from typing import NamedTuple
 from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Input, Label, Rule, Select, Static
+from textual.widgets import Input, Label, Rule, Static
 
 from ...core.config_loader import (
     ConfigError,
@@ -14,6 +14,7 @@ from ...core.config_loader import (
 )
 from ...core.constants import APP_HEADER, MODE_LABEL
 from ...core.dataclasses import TrackEnvironment, VehicleProfile
+from ..widgets.choice_field import ChoiceField
 
 
 class _Rule(NamedTuple):
@@ -58,7 +59,9 @@ class ConfigurationScreen(Screen):
     BINDINGS = [
         ("enter", "run", "Run simulator"),
         ("f2", "reset", "Reset config"),
-        ("escape", "close", "Close simulation"),
+        ("up", "app.focus_previous", "Previous field"),
+        ("down", "app.focus_next", "Next field"),
+        ("escape", "close", "Quit"),
     ]
 
     _profiles: dict[str, VehicleProfile]
@@ -67,32 +70,25 @@ class ConfigurationScreen(Screen):
     def compose(self) -> ComposeResult:
         with Vertical(id="config-root"):
             with Horizontal(id="config-header"):
-                yield Static(f"🏁 {APP_HEADER}", id="header-title")
+                yield Static(APP_HEADER, id="header-title")
                 yield Static(MODE_LABEL, id="header-mode", markup=False)
-            yield Rule()
             with Grid(id="panel-grid"):
                 with Vertical(classes="panel"):
-                    yield Static(
-                        "📥 CAR PROPERTIES (VEHICLE SPEC)", classes="panel-title"
-                    )
-                    yield from self._select_field("Active Profile ID", "vehicle-select")
+                    yield Static("CAR PROPERTIES (VEHICLE SPEC)", classes="panel-title")
+                    yield from self._choice_field("Active Profile ID", "vehicle-select")
                     yield from self._number_field("Body Mass (grams)", "veh-mass", "0.0")
                     yield from self._number_field("Frontal Area (m²)", "veh-area", "0.000000")
                     yield from self._number_field("Drag Coeff (Cd)", "veh-cd", "0.000")
                     yield from self._number_field("Lift Coeff (Cl)", "veh-cl", "0.000")
                 with Vertical(classes="panel"):
-                    yield Static(
-                        "🌡️ TRACK CONDITIONS (ENVIRONMENT)", classes="panel-title"
-                    )
-                    yield from self._select_field("Location ID", "location-select")
+                    yield Static("TRACK CONDITIONS (ENVIRONMENT)", classes="panel-title")
+                    yield from self._choice_field("Location ID", "location-select")
                     yield from self._number_field("Track Length (m)", "trk-length", "20.0")
                     yield from self._number_field("Ambient Temp (°C)", "trk-temp", "0.0")
                     yield from self._number_field("Baro Pressure (kPa)", "trk-pressure", "0.0")
-                    yield from self._number_field("Relative Humidity (%)", "trk-humidity", "0.0")
+                    yield from self._number_field("Humidity (%)", "trk-humidity", "0.0")
                 with Vertical(classes="panel panel-last"):
-                    yield Static(
-                        "🔧 SYSTEM TUNING & HARDWARE", classes="panel-title"
-                    )
+                    yield Static("SYSTEM TUNING & HARDWARE", classes="panel-title")
                     yield from self._number_field("Orifice Throat (mm)", "sys-orifice", "0.00")
                     yield from self._number_field("Bearing Friction (μ)", "sys-friction", "0.000")
                     yield from self._number_field("Monte Carlo Batch", "run-iterations", "10000")
@@ -101,17 +97,16 @@ class ConfigurationScreen(Screen):
             yield Rule()
             with Vertical(id="checklist-panel"):
                 yield Static(
-                    "📋 SYSTEM PRE-FLIGHT CHECKLIST & PROFILE DATA VALIDATION",
+                    "SYSTEM PRE-FLIGHT CHECKLIST & PROFILE DATA VALIDATION",
                     id="checklist-title",
                 )
                 yield Static("", id="check-vehicle", classes="check-row")
                 yield Static("", id="check-fluid", classes="check-row")
                 yield Static("", id="check-nozzle", classes="check-row")
                 yield Static("", id="check-status", classes="check-status")
-            yield Rule()
             yield Static(
-                "[ENTER] Trigger Multi-Threaded Simulator Run  │  "
-                "[F2] Reset Config Values  │  [ESC] Close Simulation",
+                "[ENTER] Run   [TAB] Next Field   [↑/↓] Navigate   "
+                "[←/→] Change Option   [F2] Reset   [ESC] Quit",
                 id="config-footer",
                 markup=False,
             )
@@ -123,27 +118,24 @@ class ConfigurationScreen(Screen):
             self._profiles, _ = load_vehicle_profiles()
             self._locations, _ = load_track_environments()
         except ConfigError as exc:
-            self.query_one("#check-status", Static).update(
-                f"[bold red]{exc}[/]"
-            )
+            self.query_one("#check-status", Static).update(f"[#cc6b6b]{exc}[/]")
 
-        self.query_one("#vehicle-select", Select).set_options(
-            [(profile.name, key) for key, profile in self._profiles.items()]
-        )
-        self.query_one("#location-select", Select).set_options(
-            [(place.name, key) for key, place in self._locations.items()]
-        )
+        vehicle = self.query_one("#vehicle-select", ChoiceField)
+        location = self.query_one("#location-select", ChoiceField)
+        vehicle.set_options([(profile.name, key) for key, profile in self._profiles.items()])
+        location.set_options([(place.name, key) for key, place in self._locations.items()])
+        vehicle.focus()
         self.refresh_checklist()
 
-    def on_select_changed(self, event: Select.Changed) -> None:
-        if event.value is Select.BLANK:
+    def on_choice_field_changed(self, event: ChoiceField.Changed) -> None:
+        if event.value is None:
             return
         key = str(event.value)
-        if event.select.id == "vehicle-select":
+        if event.choice.id == "vehicle-select":
             profile = self._profiles.get(key)
             if profile is not None:
                 self._fill_vehicle(profile)
-        elif event.select.id == "location-select":
+        elif event.choice.id == "location-select":
             location = self._locations.get(key)
             if location is not None:
                 self._fill_track(location)
@@ -173,15 +165,15 @@ class ConfigurationScreen(Screen):
     def action_reset(self) -> None:
         for widget_id, value in DEFAULTS.items():
             self.query_one(f"#{widget_id}", Input).value = value
-        self.query_one("#vehicle-select", Select).clear()
-        self.query_one("#location-select", Select).clear()
+        self.query_one("#vehicle-select", ChoiceField).clear()
+        self.query_one("#location-select", ChoiceField).clear()
         self.refresh_checklist()
 
     def action_close(self) -> None:
         self.app.exit()
 
     def _launch_blocked(self) -> bool:
-        return not self._checklist_state()[0]
+        return not self._checklist_state()[3]
 
     def _checklist_state(self) -> tuple[bool, bool, bool, bool]:
         mass = self._as_float("veh-mass")
@@ -220,20 +212,20 @@ class ConfigurationScreen(Screen):
         )
         if ready:
             self.query_one("#check-status", Static).update(
-                "[bold green]📊 SYSTEM DIAGNOSTIC STATUS: "
-                "✅ LAUNCH READY — ALL SYSTEMS NOMINAL[/]"
+                "[#6fae7f]SYSTEM DIAGNOSTIC STATUS: "
+                "LAUNCH READY - ALL SYSTEMS NOMINAL[/]"
             )
         else:
             self.query_one("#check-status", Static).update(
-                "[bold red]📊 SYSTEM DIAGNOSTIC STATUS: "
-                "🛑 LAUNCH BLOCKED — INITIALIZE SYSTEM VARIABLES[/]"
+                "[#cc6b6b]SYSTEM DIAGNOSTIC STATUS: "
+                "LAUNCH BLOCKED - INITIALIZE SYSTEM VARIABLES[/]"
             )
 
     def _check_line(self, ok: bool, failure: str, success: str) -> str:
-        colour = "green" if ok else "red"
-        icon = "✅" if ok else "❌"
+        colour = "#6fae7f" if ok else "#cc6b6b"
+        marker = "[ OK ]" if ok else "[FAIL]"
         message = success if ok else failure
-        return f"[{colour}]\\[{icon}] {message}[/]"
+        return f"[{colour}]\\{marker} {message}[/]"
 
     def _validate_fields(self) -> list[str]:
         errors: list[str] = []
@@ -254,23 +246,16 @@ class ConfigurationScreen(Screen):
 
     def _number_field(self, label: str, widget_id: str, value: str) -> ComposeResult:
         with Horizontal(classes="field-row"):
-            yield Label(label.ljust(21) + ":", classes="field-label")
+            yield Label(label.ljust(20) + ":", classes="field-label")
             yield Static("[", classes="field-bracket", markup=False)
             yield Input(value=value, id=widget_id, classes="field-input", compact=True)
             yield Static("]", classes="field-bracket", markup=False)
 
-    def _select_field(self, label: str, widget_id: str) -> ComposeResult:
+    def _choice_field(self, label: str, widget_id: str) -> ComposeResult:
         with Horizontal(classes="field-row"):
-            yield Label(label.ljust(21) + ":", classes="field-label")
+            yield Label(label.ljust(20) + ":", classes="field-label")
             yield Static("[", classes="field-bracket", markup=False)
-            yield Select(
-                [],
-                prompt="N/A",
-                allow_blank=True,
-                id=widget_id,
-                classes="field-select",
-                compact=True,
-            )
+            yield ChoiceField(id=widget_id, classes="field-input choice-field")
             yield Static("]", classes="field-bracket", markup=False)
 
     def _fill_vehicle(self, profile: VehicleProfile) -> None:

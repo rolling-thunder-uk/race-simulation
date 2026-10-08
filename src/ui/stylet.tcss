@@ -1,6 +1,6 @@
 Screen {
-    background: #0d0d0f;
-    color: #d8d8d8;
+    background: #0d0e12;
+    color: #c8cad1;
 }
 
 /* Intro */
@@ -14,21 +14,21 @@ IntroScreen {
     max-width: 90%;
     height: auto;
     padding: 2 4;
-    border: round #b3122e;
-    background: #121216;
+    border: round #262832;
+    background: #12131a;
 }
 
 #intro-title {
     width: 100%;
     text-align: center;
     text-style: bold;
-    color: #b3122e;
+    color: #a3545c;
 }
 
 #intro-subtitle {
     width: 100%;
     text-align: center;
-    color: #8a8a92;
+    color: #83868f;
     padding-bottom: 1;
 }
 
@@ -38,20 +38,20 @@ IntroScreen {
 #intro-support {
     width: 100%;
     text-align: center;
-    color: #c8c8cf;
+    color: #c8cad1;
 }
 
 #intro-disclaimer {
     width: 100%;
     text-align: center;
-    color: #8a8a92;
+    color: #83868f;
     padding-top: 1;
 }
 
 #intro-hint {
     width: 100%;
     text-align: center;
-    color: #6a6a72;
+    color: #5c5f6a;
     padding-top: 2;
 }
 
@@ -60,31 +60,32 @@ IntroScreen {
 #config-root {
     width: 100%;
     height: 100%;
-    border: round #b3122e;
+    border: round #262832;
 }
 
 #config-header {
     width: 100%;
-    height: 1;
-    background: #b3122e;
-    color: #ffffff;
-    text-style: bold;
+    height: 2;
+    background: #15161c;
+    border-bottom: solid #262832;
 }
 
 #header-title {
     width: 1fr;
     padding: 0 1;
+    color: #c8cad1;
+    text-style: bold;
 }
 
 #header-mode {
     width: auto;
     padding: 0 2;
-    color: #ffe3e8;
+    color: #a3545c;
 }
 
 Rule {
     margin: 0;
-    color: #b3122e;
+    color: #262832;
 }
 
 #panel-grid {
@@ -96,7 +97,7 @@ Rule {
     width: 100%;
     height: auto;
     padding: 0 1;
-    border-right: solid #b3122e;
+    border-right: solid #262832;
 }
 
 .panel-last {
@@ -105,11 +106,11 @@ Rule {
 
 .panel-title {
     width: 100%;
-    height: 1;
+    height: 2;
     padding: 0 1;
-    background: #1b1b22;
-    color: #e8e8ee;
+    color: #83868f;
     text-style: bold;
+    border-bottom: solid #262832;
 }
 
 .field-row {
@@ -118,35 +119,35 @@ Rule {
 }
 
 .field-label {
-    width: 23;
-    color: #c8c8cf;
+    width: 22;
+    color: #83868f;
 }
 
 .field-bracket {
     width: 1;
-    color: #6a6a72;
+    color: #3a3d48;
 }
 
 .field-input {
-    width: 10;
+    width: 1fr;
     border: none;
-    background: #1b1b22;
-    color: #e8e8ee;
+    background: #17181f;
+    color: #c8cad1;
+    text-overflow: ellipsis;
 }
 
 .field-input:focus {
-    background: #2a2a33;
+    background: #23252f;
     color: #ffffff;
-    text-style: bold;
 }
 
 .field-input.error {
-    background: #2a1417;
-    color: #ff6b6b;
+    background: #241a1c;
+    color: #cc6b6b;
 }
 
-.field-select {
-    width: 10;
+.choice-field {
+    padding: 0 1;
 }
 
 #checklist-panel {
@@ -157,11 +158,11 @@ Rule {
 
 #checklist-title {
     width: 100%;
-    height: 1;
+    height: 2;
     padding: 0 1;
-    background: #1b1b22;
-    color: #e8e8ee;
+    color: #83868f;
     text-style: bold;
+    border-bottom: solid #262832;
 }
 
 .check-row {
@@ -179,9 +180,9 @@ Rule {
 
 #config-footer {
     width: 100%;
-    height: 1;
+    height: 2;
     padding: 0 1;
-    background: #b3122e;
-    color: #ffffff;
-    text-style: bold;
+    background: #15161c;
+    border-top: solid #262832;
+    color: #83868f;
 }
