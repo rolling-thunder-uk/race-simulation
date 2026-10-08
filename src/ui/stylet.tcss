@@ -1,1 +1,63 @@
-# Textual CSS stylesheet for Carbon & Crimson theme
+Screen {
+    background: #0d0d0f;
+    color: #d8d8d8;
+    align: center middle;
+}
+
+#intro-card {
+    width: auto;
+    height: auto;
+    padding: 2 5;
+    border: round #b3122e;
+    background: #121216;
+}
+
+#intro-title {
+    width: 100%;
+    text-align: center;
+    text-style: bold;
+    color: #b3122e;
+}
+
+#intro-subtitle {
+    width: 100%;
+    text-align: center;
+    color: #8a8a92;
+    padding-bottom: 1;
+}
+
+#intro-by,
+#intro-author,
+#intro-license,
+#intro-support {
+    width: 100%;
+    text-align: center;
+    color: #c8c8cf;
+}
+
+#intro-disclaimer {
+    width: 100%;
+    text-align: center;
+    color: #8a8a92;
+    padding-top: 1;
+}
+
+#intro-hint {
+    width: 100%;
+    text-align: center;
+    color: #6a6a72;
+    padding-top: 2;
+}
+
+#config-title {
+    width: 100%;
+    text-align: center;
+    text-style: bold;
+    color: #b3122e;
+}
+
+#config-body {
+    width: 100%;
+    text-align: center;
+    color: #8a8a92;
+}
