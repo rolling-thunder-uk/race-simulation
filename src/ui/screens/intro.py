@@ -15,11 +15,11 @@ class IntroScreen(Screen):
                 "Multi-Physics & Thermodynamic Simulator  v1.0.0",
                 id="intro-subtitle",
             )
-            yield Static("Designed by Rolling Thunder", id="intro-by")
             yield Static(
-                "Team Software Engineer: Alex Chouliaras",
-                id="intro-author",
+                "Designed by Alex Chouliaras for Rolling Thunder",
+                id="intro-by",
             )
+            yield Static("Team Software Engineer", id="intro-author")
             yield Static(
                 "Not responsible for inaccurate timing or simulation results.",
                 id="intro-disclaimer",
