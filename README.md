@@ -31,10 +31,10 @@ The terminal user interface is powered by **Textual**, utilising an asynchronous
 Use this index to monitor which subsystems have been mathematically implemented, are currently being coded, or remain in the development pipeline.
 
 ### Fluids & Propulsion
-- [ ] **Explicit Helmholtz Integration Hook:** Direct connection to high-fidelity fluid properties for tracking thermodynamic state variables.
-- [ ] **Time-Dependent Orifice Puncture Function:** Exponential throat area scaling (\(A(t) = A_{max}(1 - e^{-t/\tau})\)) simulating the mechanical launcher pin withdrawing over the first 15ms.
-- [ ] **Choked Nozzle Flow Extremity Limits:** Enforcement of critical pressure thresholds separating supersonic sonic exhaust flow from sub-critical, enthalpy-driven subsonic dump speeds.
-- [ ] **Active Mass Depletion Vectoring:** Real-time computation of escaping gas mass flow (\(m_{dot}\)) to continuously lighten the vehicle state vehicle inertia calculations.
+- [x] **Explicit Helmholtz Integration Hook:** Direct connection to high-fidelity fluid properties for tracking thermodynamic state variables.
+- [x] **Time-Dependent Orifice Puncture Function:** Exponential throat area scaling (\(A(t) = A_{max}(1 - e^{-t/\tau})\)) simulating the mechanical launcher pin withdrawing over the first 15ms.
+- [x] **Choked Nozzle Flow Extremity Limits:** Enforcement of critical pressure thresholds separating supersonic sonic exhaust flow from sub-critical, enthalpy-driven subsonic dump speeds.
+- [x] **Active Mass Depletion Vectoring:** Real-time computation of escaping gas mass flow (\(m_{dot}\)) to continuously lighten the vehicle state vehicle inertia calculations.
 
 ### Vehicle & Track Kinematics
 - [ ] **2DOF Forward Surge Kinematics Engine:** Foundational matrix equations balancing raw propellant thrust against frontal cross-sectional aerodynamic drag penalties.
