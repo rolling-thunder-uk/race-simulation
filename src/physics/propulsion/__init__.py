@@ -11,12 +11,21 @@ from .gas_state import (
     state_from_t_p,
 )
 from .mass_depletion import mass_flow_rate
+from .monte_carlo import (
+    BatchSummary,
+    BlowdownMetrics,
+    CanisterUncertainties,
+    run_blowdown_batch,
+)
 from .orifice_decay import OrificeProfile, area_from_diameter, orifice_area
 from .thermo_core import CanisterConfig, CanisterSample, ThermoCore
 
 __all__ = [
+    "BatchSummary",
+    "BlowdownMetrics",
     "CanisterConfig",
     "CanisterSample",
+    "CanisterUncertainties",
     "FluidPropertyError",
     "FluidState",
     "OrificeProfile",
@@ -30,6 +39,7 @@ __all__ = [
     "mass_flow_rate",
     "mixture_internal_energy",
     "orifice_area",
+    "run_blowdown_batch",
     "saturation_pressure",
     "state_from_rho_u",
     "state_from_t_p",
