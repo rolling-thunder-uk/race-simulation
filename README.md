@@ -28,7 +28,7 @@ The terminal user interface is powered by **Textual**, utilising an asynchronous
 
 ## Development Status
 
-Use this index to monitor which subsystems have been mathematically implemented, are currently being coded, or remain in the development pipeline.
+I Use this index to monitor which subsystems have been mathematically implemented, are currently being coded, or remain in the development pipeline.
 
 ### Fluids & Propulsion
 - [x] **Explicit Helmholtz Integration Hook:** Direct connection to high-fidelity fluid properties for tracking thermodynamic state variables.
@@ -45,7 +45,7 @@ Use this index to monitor which subsystems have been mathematically implemented,
 
 ### Speed Optimizations
 - [ ] **Temperature-Pressure State Inversion Switch:** Refactoring of state properties to eliminate internal numerical library solvers.
-- [ ] **Multi-Core Process Load Spreader:** Micro-batch thread mapping utilizing native multi-processing lanes for stochastic loops.
+- [x] **Multi-Core Process Load Spreader:** Micro-batch thread mapping utilizing native multi-processing lanes for stochastic loops.
 - [ ] **Asynchronous Non-Blocking Telemetry Data Bus:** Thread-safe memory queues preventing UI frame freezes during computing spikes.
 
 ### Terminal UI & Graphing
