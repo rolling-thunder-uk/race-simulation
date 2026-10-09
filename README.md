@@ -28,7 +28,7 @@ The terminal user interface is powered by **Textual**, utilising an asynchronous
 
 ## Development Status
 
-I Use this index to monitor which subsystems have been mathematically implemented, are currently being coded, or remain in the development pipeline.
+Use this index to monitor which subsystems have been mathematically implemented, are currently being coded, or remain in the development pipeline.
 
 ### Fluids & Propulsion
 - [x] **Explicit Helmholtz Integration Hook:** Direct connection to high-fidelity fluid properties for tracking thermodynamic state variables.
