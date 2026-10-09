@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..solver import ATOL, RTOL, StagedSolution, integrate_staged
+from ..solver import ATOL, DEFAULT_METHOD, RTOL, Solution, integrate, integrate_staged
 from . import gas_state
 from .mass_depletion import mass_flow_rate
 from .orifice_decay import OrificeProfile
@@ -144,28 +144,46 @@ class ThermoCore:
     def simulate(
         self,
         duration_s: float,
+        method: str = DEFAULT_METHOD,
         rtol: float = RTOL,
         atol: float = ATOL,
         max_step: float = np.inf,
     ) -> list[CanisterSample]:
-        solution: StagedSolution = integrate_staged(
-            self.derivatives,
-            (0.0, duration_s),
-            self.initial_state(),
-            rtol=rtol,
-            atol=atol,
-            max_step=max_step,
-            events=[self._floor_event],
-        )
+        initial = self.initial_state()
+        if method == "staged":
+            solution: Solution = integrate_staged(
+                self.derivatives,
+                (0.0, duration_s),
+                initial,
+                rtol=rtol,
+                atol=atol,
+                max_step=max_step,
+                events=[self._floor_event],
+            )
+        else:
+            solution = integrate(
+                self.derivatives,
+                (0.0, duration_s),
+                initial,
+                method=method,
+                rtol=rtol,
+                atol=atol,
+                max_step=max_step,
+                events=[self._floor_event],
+            )
         return [
             self.sample_at(float(solution.t[index]), solution.y[:, index])
             for index in range(solution.t.size)
         ]
 
     def pressure_curve(
-        self, duration_s: float, rtol: float = RTOL, atol: float = ATOL
+        self,
+        duration_s: float,
+        method: str = DEFAULT_METHOD,
+        rtol: float = RTOL,
+        atol: float = ATOL,
     ) -> tuple[np.ndarray, np.ndarray]:
-        samples = self.simulate(duration_s, rtol=rtol, atol=atol)
+        samples = self.simulate(duration_s, method=method, rtol=rtol, atol=atol)
         times = np.array([sample.time_s for sample in samples])
         pressures = np.array([sample.pressure_pa for sample in samples])
         return times, pressures
