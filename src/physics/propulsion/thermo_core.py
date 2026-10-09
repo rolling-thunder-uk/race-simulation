@@ -7,7 +7,6 @@ import numpy as np
 
 from ..solver import ATOL, RTOL, StagedSolution, integrate_staged
 from . import gas_state
-from .choke_logic import isentropic_exponent
 from .mass_depletion import mass_flow_rate
 from .orifice_decay import OrificeProfile
 
@@ -76,16 +75,15 @@ class ThermoCore:
         density, internal_energy = float(state_vector[0]), float(state_vector[1])
         volume = self.config.volume_m3
         try:
-            state = gas_state.state_from_rho_u(density, internal_energy)
+            flow = gas_state.flow_from_rho_u(density, internal_energy)
         except gas_state.FluidPropertyError:
             return np.zeros(2)
 
-        gamma = isentropic_exponent(state)
         area = self.config.orifice.area(time_s)
         mass_flow, _ = mass_flow_rate(
-            state.density_kg_m3,
-            state.pressure_pa,
-            gamma,
+            density,
+            flow.pressure_pa,
+            flow.isentropic_exponent,
             area,
             self.config.ambient_pressure_pa,
             self.config.discharge_coefficient,
@@ -94,18 +92,19 @@ class ThermoCore:
         heat_flow = (
             self.config.heat_transfer_coefficient_w_m2k
             * self.config.surface_area_m2
-            * (self.config.ambient_temperature_k - state.temperature_k)
+            * (self.config.ambient_temperature_k - flow.temperature_k)
         )
 
         density_rate = -mass_flow / volume
-        rho_u_rate = (-mass_flow * state.enthalpy_j_kg + heat_flow) / volume
+        rho_u_rate = (-mass_flow * flow.enthalpy_j_kg + heat_flow) / volume
         energy_rate = (rho_u_rate - internal_energy * density_rate) / density
         return np.array([density_rate, energy_rate])
 
     def sample_at(self, time_s: float, state_vector: np.ndarray) -> CanisterSample:
         density, internal_energy = float(state_vector[0]), float(state_vector[1])
         state = gas_state.state_from_rho_u(density, internal_energy)
-        gamma = isentropic_exponent(state)
+        flow = gas_state.flow_from_rho_u(density, internal_energy)
+        gamma = flow.isentropic_exponent
         area = self.config.orifice.area(time_s)
         mass_flow, choked = mass_flow_rate(
             state.density_kg_m3,
@@ -132,12 +131,12 @@ class ThermoCore:
 
     def _floor_event(self, time_s: float, state_vector: np.ndarray) -> float:
         try:
-            state = gas_state.state_from_rho_u(
+            flow = gas_state.flow_from_rho_u(
                 float(state_vector[0]), float(state_vector[1])
             )
         except gas_state.FluidPropertyError:
             return -1.0
-        return state.pressure_pa - self.minimum_pressure_pa
+        return flow.pressure_pa - self.minimum_pressure_pa
 
     _floor_event.terminal = True
     _floor_event.direction = -1

@@ -93,40 +93,49 @@ def _prop(output: str, name_a: str, value_a: float, name_b: str, value_b: float)
 
 
 def _phase(name_a: str, value_a: float, name_b: str, value_b: float) -> str:
-    backend = _update(name_a, value_a, name_b, value_b)
+    return _phase_from(_update(name_a, value_a, name_b, value_b))
+
+
+def _phase_from(backend: AbstractState) -> str:
     try:
         return str(backend.phase()).rsplit(".", 1)[-1].replace("iphase_", "")
     except Exception:
         return "unknown"
 
 
-def _build_state(
+def _state_from_backend(
+    backend: AbstractState,
     temperature_k: float,
     pressure_pa: float,
     density_kg_m3: float,
     internal_energy_j_kg: float,
     quality: float | None,
-    phase: str,
 ) -> FluidState:
-    enthalpy = _prop("H", "D", density_kg_m3, "U", internal_energy_j_kg)
-    entropy = _prop("S", "D", density_kg_m3, "U", internal_energy_j_kg)
-    cp = _prop("C", "D", density_kg_m3, "U", internal_energy_j_kg)
     try:
-        sound_speed = _prop("A", "D", density_kg_m3, "U", internal_energy_j_kg)
-    except FluidPropertyError:
+        sound_speed: float | None = float(backend.speed_sound())
+    except Exception:
         sound_speed = None
     return FluidState(
         temperature_k=temperature_k,
         pressure_pa=pressure_pa,
         density_kg_m3=density_kg_m3,
         internal_energy_j_kg=internal_energy_j_kg,
-        enthalpy_j_kg=enthalpy,
-        entropy_j_kg_k=entropy,
+        enthalpy_j_kg=float(backend.hmass()),
+        entropy_j_kg_k=float(backend.smass()),
         sound_speed_m_s=sound_speed,
-        cp_j_kg_k=cp,
-        phase=phase,
+        cp_j_kg_k=float(backend.cpmass()),
+        phase=_phase_from(backend),
         quality=quality,
     )
+
+
+@dataclass(frozen=True)
+class FlowState:
+    temperature_k: float
+    pressure_pa: float
+    enthalpy_j_kg: float
+    quality: float | None
+    isentropic_exponent: float
 
 
 def state_from_rho_u(density_kg_m3: float, internal_energy_j_kg: float) -> FluidState:
@@ -137,32 +146,69 @@ def state_from_rho_u(density_kg_m3: float, internal_energy_j_kg: float) -> Fluid
     """
     if density_kg_m3 <= 0.0:
         raise FluidPropertyError("density must be positive")
-    temperature = _prop("T", "D", density_kg_m3, "U", internal_energy_j_kg)
-    pressure = _prop("P", "D", density_kg_m3, "U", internal_energy_j_kg)
-    raw_quality = _prop("Q", "D", density_kg_m3, "U", internal_energy_j_kg)
+    backend = _update("D", density_kg_m3, "U", internal_energy_j_kg)
+    raw_quality = float(backend.Q())
     quality = raw_quality if 0.0 <= raw_quality <= 1.0 else None
-    phase = _phase("D", density_kg_m3, "U", internal_energy_j_kg)
-    return _build_state(
-        temperature, pressure, density_kg_m3, internal_energy_j_kg, quality, phase
+    return _state_from_backend(
+        backend,
+        float(backend.T()),
+        float(backend.p()),
+        density_kg_m3,
+        internal_energy_j_kg,
+        quality,
     )
+
+
+def flow_from_rho_u(density_kg_m3: float, internal_energy_j_kg: float) -> FlowState:
+    """Minimal property set the ODE right-hand side actually needs.
+
+    A single Helmholtz update yields pressure, enthalpy and phase; the
+    isentropic exponent is read from the same evaluation.
+    """
+    backend = _update("D", density_kg_m3, "U", internal_energy_j_kg)
+    temperature = float(backend.T())
+    pressure = float(backend.p())
+    enthalpy = float(backend.hmass())
+    raw_quality = float(backend.Q())
+    quality = raw_quality if 0.0 <= raw_quality <= 1.0 else None
+    if quality is None:
+        try:
+            sound = float(backend.speed_sound())
+        except Exception:
+            sound = None
+        gamma = density_kg_m3 * sound * sound / pressure if sound else 1.0001
+    else:
+        backend.update(CP.QT_INPUTS, 1.0, temperature)
+        rho_g = float(backend.rhomass())
+        a_g = float(backend.speed_sound())
+        gamma = rho_g * a_g * a_g / pressure
+    if not gamma > 1.0:
+        gamma = 1.0001
+    return FlowState(temperature, pressure, enthalpy, quality, gamma)
 
 
 def state_from_t_p(temperature_k: float, pressure_pa: float) -> FluidState:
     """Direct (T, P) property evaluation with no internal Newton iteration."""
-    density = _prop("D", "T", temperature_k, "P", pressure_pa)
-    internal_energy = _prop("U", "T", temperature_k, "P", pressure_pa)
-    phase = _phase("T", temperature_k, "P", pressure_pa)
-    return _build_state(
-        temperature_k, pressure_pa, density, internal_energy, None, phase
+    backend = _update("T", temperature_k, "P", pressure_pa)
+    return _state_from_backend(
+        backend,
+        temperature_k,
+        pressure_pa,
+        float(backend.rhomass()),
+        float(backend.umass()),
+        None,
     )
 
 
 def state_from_t_q(temperature_k: float, quality: float) -> FluidState:
-    density = _prop("D", "T", temperature_k, "Q", quality)
-    internal_energy = _prop("U", "T", temperature_k, "Q", quality)
-    pressure = _prop("P", "T", temperature_k, "Q", quality)
-    return _build_state(
-        temperature_k, pressure, density, internal_energy, quality, "twophase"
+    backend = _update("T", temperature_k, "Q", quality)
+    return _state_from_backend(
+        backend,
+        temperature_k,
+        float(backend.p()),
+        float(backend.rhomass()),
+        float(backend.umass()),
+        quality,
     )
 
 
