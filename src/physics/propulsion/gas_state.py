@@ -1,11 +1,35 @@
 # Hyper-fast direct T-P state inversion calls
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass
 
 import CoolProp.CoolProp as CP
+from CoolProp.CoolProp import AbstractState
 
 FLUID = "CO2"
+
+_INPUT_MAP = {
+    ("D", "U"): (CP.DmassUmass_INPUTS, False),
+    ("T", "P"): (CP.PT_INPUTS, True),
+    ("T", "Q"): (CP.QT_INPUTS, True),
+    ("P", "Q"): (CP.PQ_INPUTS, False),
+}
+
+_READERS = {
+    "T": lambda backend: backend.T(),
+    "P": lambda backend: backend.p(),
+    "D": lambda backend: backend.rhomass(),
+    "U": lambda backend: backend.umass(),
+    "H": lambda backend: backend.hmass(),
+    "S": lambda backend: backend.smass(),
+    "C": lambda backend: backend.cpmass(),
+    "O": lambda backend: backend.cvmass(),
+    "A": lambda backend: backend.speed_sound(),
+    "Q": lambda backend: backend.Q(),
+}
+
+_local = threading.local()
 
 
 class FluidPropertyError(RuntimeError):
@@ -30,18 +54,48 @@ class FluidState:
         return self.quality is not None
 
 
-def _prop(output: str, name_a: str, value_a: float, name_b: str, value_b: float) -> float:
+def _backend() -> AbstractState:
+    """One high-order Helmholtz state object per thread (process-safe)."""
+    backend = getattr(_local, "backend", None)
+    if backend is None:
+        backend = AbstractState("HEOS", FLUID)
+        _local.backend = backend
+    return backend
+
+
+def _update(name_a: str, value_a: float, name_b: str, value_b: float) -> AbstractState:
+    entry = _INPUT_MAP.get((name_a, name_b))
+    if entry is None:
+        raise FluidPropertyError(f"unsupported input pair ({name_a}, {name_b})")
+    inputs, swap = entry
+    first, second = (value_b, value_a) if swap else (value_a, value_b)
+    backend = _backend()
     try:
-        return float(CP.PropsSI(output, name_a, value_a, name_b, value_b, FLUID))
-    except Exception as exc:  # CoolProp raises ValueError / RuntimeError
+        backend.update(inputs, float(first), float(second))
+    except Exception as exc:
+        raise FluidPropertyError(
+            f"CO2 update failed for {name_a}={value_a:g}, {name_b}={value_b:g}"
+        ) from exc
+    return backend
+
+
+def _prop(output: str, name_a: str, value_a: float, name_b: str, value_b: float) -> float:
+    reader = _READERS.get(output)
+    if reader is None:
+        raise FluidPropertyError(f"unsupported output {output!r}")
+    backend = _update(name_a, value_a, name_b, value_b)
+    try:
+        return float(reader(backend))
+    except Exception as exc:
         raise FluidPropertyError(
             f"CO2 {output} failed for {name_a}={value_a:g}, {name_b}={value_b:g}"
         ) from exc
 
 
 def _phase(name_a: str, value_a: float, name_b: str, value_b: float) -> str:
+    backend = _update(name_a, value_a, name_b, value_b)
     try:
-        return str(CP.PhaseSI(name_a, value_a, name_b, value_b, FLUID))
+        return str(backend.phase()).rsplit(".", 1)[-1].replace("iphase_", "")
     except Exception:
         return "unknown"
 
