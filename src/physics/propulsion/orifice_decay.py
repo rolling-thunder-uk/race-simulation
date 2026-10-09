@@ -33,5 +33,9 @@ class OrificeProfile:
     def from_diameter(cls, diameter_m: float, tau_s: float = DEFAULT_TAU_S) -> "OrificeProfile":
         return cls(max_area_m2=area_from_diameter(diameter_m), tau_s=tau_s)
 
+    @property
+    def diameter_m(self) -> float:
+        return math.sqrt(4.0 * self.max_area_m2 / math.pi)
+
     def area(self, time_s: float) -> float:
         return orifice_area(time_s, self.max_area_m2, self.tau_s)
